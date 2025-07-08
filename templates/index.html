@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mensajes LOG</title>
+  <style>
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h2>Registo de Mensajes</h2>
+  <table>
+    <tr>
+      <th>Fecha y Hora</th>
+      <th>Mensaje</th>
+    </tr>
+    {% for registro in registros %}
+      <tr>
+        <th>{{ registro.fecha_y_hora }}</th>
+        <th>{{ registro.texto }}</th>
+      </tr>
+    {% endfor %}
+
+  </table>
+  </ul>
+</body>
+</html>
