@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from dotenv import load_dotenv
@@ -106,6 +106,15 @@ def enviar_a_zoho():
     else:
         agregar_mensajes_log("❌ Error al enviar Lead: " + response.text)
         return f"Error al enviar Lead: {response.text}", 500
+
+# Ruta para recibir el código OAuth de Zoho
+@app.route('/oauth2callback')
+def oauth_callback():
+    code = request.args.get('code')
+    if code:
+        return f"Código recibido correctamente: {code}"
+    else:
+        return "No se recibió ningún código."
 
 if __name__=='__main__':
     app.run(host='0.0.0.0',port=80,debug=True)
