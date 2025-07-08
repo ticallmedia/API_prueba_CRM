@@ -1,8 +1,14 @@
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from dotenv import load_dotenv
+import requests
 import json
-
+import os
+#____________________________________________________________________________________
+#cargar variables de entorno
+load_dotenv()
+#____________________________________________________________________________________
 app = Flask(__name__)
 
 #Coniguración de la base de datos SQLITE
@@ -20,17 +26,24 @@ class Log(db.Model):
 with app.app_context():
     db.create_all()
 
-    prueba1 = Log(texto = 'Mensaje de prueba 1') 
-    prueba2 = Log(texto = 'Mensaje de prueba 2') 
+    #prueba1 = Log(texto = 'Mensaje de prueba 1') 
+    #prueba2 = Log(texto = 'Mensaje de prueba 2') 
 
-    db.session.add(prueba1)
-    db.session.add(prueba2)
-    db.session.commit()
+    #db.session.add(prueba1)
+    #db.session.add(prueba2)
+    #db.session.commit()
 
 #funcion para ordenar los registros por fecha y hora
 def ordenar_por_fecha_y_hora(registros):
     return sorted(registros, key=lambda x: x.fecha_y_hora, reverse=True)
 
+
+#Función información a la base de datos
+def agregar_mensajes_log(texto):
+    #gurardar mensajes en la base de datos
+    nuevo_registro = Log(texto=texto)
+    db.session.add(nuevo_registro)
+    db.session.commit()
 
 @app.route('/')
 
@@ -40,21 +53,59 @@ def index():
     registros_ordenados = ordenar_por_fecha_y_hora(registros)
     return render_template('index.html',registros = registros_ordenados)
 
-#agregar información a la base de datos
-mensajes_log = []
+#funcion para obtener el acceso de token desde refresh token
+def get_access_token():
+    url= "https://accounts.zoho.com/oauth/v2/token"
+    params = {
+        "refresh_token": os.getenv("ZOHO_REFRESH_TOKEN"),
+        "client_id": os.getenv("ZOHO_CLIENT_ID"),
+        "client_secret": os.getenv("ZOHO_CLIENT_SECRET"),
+        "grant_type": "refresh_token"
+    }
 
-#Función información a la base de datos
-def agregar_mensajes_log(texto):
-    mensajes_log.append(texto)
+    response = requests.post(url,params=params)
+    data = response.json()
+    
+    if "access_token" in data:
+        return data["access_token"]
+    else:
+        print(f"Error al obtener token: {data}")
+        return None
 
-    #gurardar mensajes en la base de datos
-    nuevo_registro = Log(texto=texto)
-    db.session.add(nuevo_registro)
-    db.session.commit()
+# Ruta de prueba para enviar Lead a Zoho
+@app.route('/enviar-a-zoho')
 
-#para agregar mensaje de ejemplo
-#agregar_mensajes_log(json.dumps('Test1'))
+def enviar_a_zoho():
+    access_token = get_access_token()
 
+    if not access_token:
+        return "Error al obtener token"
+    
+    payload = {
+        "data": [
+            {
+                "First_Name": "César",
+                "Email": "cesar@example.com",
+                "Mobile": "3000000000",
+                "Origen": "WhatsApp"
+            }
+        ],
+        "duplicate_check_fields": ["Email"]
+    }
+
+    headers = {
+        "Authorization": f"Zoho-oauthtoken {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(os.getenv("ZOHO_API_URL") + "/upsert", headers=headers, json=payload)
+
+    if response.status_code in [200, 201]:
+        agregar_mensajes_log("✅ Lead enviado a Zoho correctamente")
+        return "Lead enviado correctamente"
+    else:
+        agregar_mensajes_log("❌ Error al enviar Lead: " + response.text)
+        return f"Error al enviar Lead: {response.text}", 500
 
 if __name__=='__main__':
     app.run(host='0.0.0.0',port=80,debug=True)
