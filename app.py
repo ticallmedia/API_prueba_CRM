@@ -72,6 +72,13 @@ def get_access_token():
         print(f"Error al obtener token: {data}")
         return None
 # ─────────────────────────────────────────────────────────────
+
+@app.route('/debug-token')
+def debug_token():
+    access_token = get_access_token()
+    return f"Access token (si existe): {access_token}"
+
+# ─────────────────────────────────────────────────────────────
 # OPCIONAL: Obtener refresh_token desde el code (una vez)
 @app.route('/obtener-refresh-token')
 def get_refresh_token_once():
