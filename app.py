@@ -64,19 +64,22 @@ def get_access_token():
 
     response = requests.post(url,params=params)
     data = response.json()
-    print(f"Token response: {data}")
+    return f"DEBUG: {data}"
 
-    if "access_token" in data:
-        return data["access_token"]
-    else:
-        print(f"Error al obtener token: {data}")
-        return None
+    #print(f"Token response: {data}")
+
+    #if "access_token" in data:
+    #    return data["access_token"]
+    #else:
+    #    print(f"Error al obtener token: {data}")
+    #    return None
 # ─────────────────────────────────────────────────────────────
 
 @app.route('/debug-token')
 def debug_token():
-    access_token = get_access_token()
-    return f"Access token (si existe): {access_token}"
+    return get_access_token()
+    #access_token = get_access_token()
+    #return f"Access token (si existe): {access_token}"
 
 # ─────────────────────────────────────────────────────────────
 # OPCIONAL: Obtener refresh_token desde el code (una vez)
