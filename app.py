@@ -112,6 +112,11 @@ def enviar_a_zoho():
     if not access_token:
         return "Error al obtener access_token"
     
+    headers = {
+        "Authorization": f"Zoho-oauthtoken {access_token}",
+        "Content-Type": "application/json"
+    }
+
     payload = {
         "data": [
             {
@@ -124,19 +129,21 @@ def enviar_a_zoho():
         "duplicate_check_fields": ["Email"]
     }
 
-    headers = {
-        "Authorization": f"Zoho-oauthtoken {access_token}",
-        "Content-Type": "application/json"
-    }
+    url = os.getenv("ZOHO_API_URL") + "/upsert"
 
-    response = requests.post(os.getenv("ZOHO_API_URL") + "/upsert", headers=headers, json=payload)
+    response = requests.post(url, headers=headers, json=payload)
+
+    try:
+        data = response.json()
+    except Exception as e:
+        data = {"error": "No JSON response", "raw": response.text}
 
     if response.status_code in [200, 201]:
-        agregar_mensajes_log("✅ Lead enviado a Zoho correctamente")
-        return "Lead enviado correctamente"
+        agregar_mensajes_log("✅ Lead enviado correctamente")
+        return "✅ Lead enviado correctamente"
     else:
-        agregar_mensajes_log("❌ Error al enviar Lead: " + response.text)
-        return f"Error al enviar Lead: {response.text}", 500
+        agregar_mensajes_log("❌ Error al enviar Lead: " + str(data))
+        return f"❌ Error al enviar Lead: {data}", 500
 
 # Ruta para recibir el código OAuth de Zoho
 @app.route('/oauth2callback')
