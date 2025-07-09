@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from dotenv import load_dotenv
 import requests
-import json
 import os
 #____________________________________________________________________________________
 #cargar variables de entorno
@@ -65,13 +64,35 @@ def get_access_token():
 
     response = requests.post(url,params=params)
     data = response.json()
-    
+    print(f"Token response: {data}")
+
     if "access_token" in data:
         return data["access_token"]
     else:
         print(f"Error al obtener token: {data}")
         return None
+# ─────────────────────────────────────────────────────────────
+# OPCIONAL: Obtener refresh_token desde el code (una vez)
+@app.route('/obtener-refresh-token')
+def get_refresh_token_once():
+    code = request.args.get('code')
+    if not code:
+        return "❌ Debes pasar el parámetro ?code=XXXXX"
 
+    url = "https://accounts.zoho.com/oauth/v2/token"
+    params = {
+        "code": code,
+        "client_id": os.getenv("ZOHO_CLIENT_ID"),
+        "client_secret": os.getenv("ZOHO_CLIENT_SECRET"),
+        "redirect_uri": os.getenv("ZOHO_REDIRECT_URI"),
+        "grant_type": "authorization_code"
+    }
+
+    response = requests.post(url, params=params)
+    data = response.json()
+    return data  # Muestra access_token y refresh_token
+
+# ─────────────────────────────────────────────────────────────
 # Ruta de prueba para enviar Lead a Zoho
 @app.route('/enviar-a-zoho')
 
@@ -79,7 +100,7 @@ def enviar_a_zoho():
     access_token = get_access_token()
 
     if not access_token:
-        return "Error al obtener token"
+        return "Error al obtener access_token"
     
     payload = {
         "data": [
