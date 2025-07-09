@@ -121,6 +121,7 @@ def enviar_a_zoho():
         "data": [
             {
                 "First_Name": "César",
+                "Last_Name": "Chavarriaga",
                 "Email": "cesar@example.com",
                 "Mobile": "3000000000",
                 "Origen": "WhatsApp"
@@ -132,6 +133,8 @@ def enviar_a_zoho():
     url = os.getenv("ZOHO_API_URL") + "/upsert"
 
     response = requests.post(url, headers=headers, json=payload)
+    print("Access token usado en envío:", access_token)
+
 
     try:
         data = response.json()
