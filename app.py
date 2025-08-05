@@ -76,7 +76,7 @@ def enviar_a_zoho():
         "data": [
             {
                 "First_Name": "Joaquin",
-                "Last_Name": "Chavarriaga Muñoz",
+                "Last_Name": "Chavarriaga",
                 "Email": "joaquin@example.com",
                 "Mobile": "3100000000",
                 "Origen": "WhatsApp"
