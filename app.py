@@ -4,10 +4,10 @@ from datetime import datetime
 from dotenv import load_dotenv
 import requests
 import os
-
+#________________________________________________________________________________________
 # Cargar variables de entorno desde .env
 load_dotenv()
-
+#________________________________________________________________________________________
 app = Flask(__name__)
 
 # Configuración de la base de datos SQLite
@@ -52,7 +52,7 @@ def get_access_token():
         return data["access_token"]
     else:
         return None
-
+#________________________________________________________________________________________
 # Rutas principales
 
 @app.route('/')
@@ -60,7 +60,7 @@ def index():
     registros = Log.query.all()
     registros_ordenados = ordenar_por_fecha_y_hora(registros)
     return render_template('index.html', registros=registros_ordenados)
-
+#________________________________________________________________________________________
 @app.route('/enviar-a-zoho')
 def enviar_a_zoho():
     access_token = get_access_token()
@@ -75,10 +75,10 @@ def enviar_a_zoho():
     payload = {
         "data": [
             {
-                "First_Name": "César",
-                "Last_Name": "Chavarriaga",
-                "Email": "cesar@example.com",
-                "Mobile": "3000000000",
+                "First_Name": "Joaquin",
+                "Last_Name": "Chavarriaga Muñoz",
+                "Email": "joaquin@example.com",
+                "Mobile": "3100000000",
                 "Origen": "WhatsApp"
             }
         ],
@@ -99,14 +99,14 @@ def enviar_a_zoho():
     else:
         agregar_mensajes_log("❌ Error al enviar Lead: " + str(data))
         return f"❌ Error al enviar Lead: {data}", 500
-
+#________________________________________________________________________________________
 @app.route('/oauth2callback')
 def oauth_callback():
     code = request.args.get('code')
     if code:
         return f"Código recibido correctamente: {code}"
     return "No se recibió ningún código."
-
+#________________________________________________________________________________________
 @app.route('/debug-token')
 def debug_token():
     token = get_access_token()
@@ -114,3 +114,4 @@ def debug_token():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
+#________________________________________________________________________________________
